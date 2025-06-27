@@ -39,9 +39,9 @@ func main() {
 	mu.Handle("/app/", apiCfg.middlewareMetricsInc(http.StripPrefix("/app/", http.FileServer(http.Dir(".")))))
 	mu.HandleFunc("GET /admin/metrics", apiCfg.handlerMetrics)
 	mu.HandleFunc("POST /admin/reset", apiCfg.handlerReset)
-	mu.HandleFunc("POST /api/chips", apiCfg.handlerChirps)
 	mu.HandleFunc("POST /api/users", apiCfg.handlerCreateUser)
 	mu.HandleFunc("POST /api/chirps", apiCfg.handlerChirps)
+	mu.HandleFunc("GET /api/chirps", apiCfg.handlerGetChirps)
 	server := http.Server{
 		Handler: 	mu,
 		Addr: 		":8080",

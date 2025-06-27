@@ -59,3 +59,25 @@ func (cfg *apiConfig) handlerChirps(w http.ResponseWriter, req *http.Request) {
 		User_ID: chirp.UserID,
 	})
 }
+
+func (cfg *apiConfig) handlerGetChirps(w http.ResponseWriter, req *http.Request) {
+	chirps, err := cfg.queries.GetChirps(req.Context())
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Couldn't get chirps", err)
+	}
+	
+	timeline := make([]Chirp, len(chirps))
+
+	for i, chirp := range chirps {
+		data := Chirp{
+			ID: chirp.ID,
+			CreatedAt: chirp.CreatedAt,
+			UpdatedAt: chirp.UpdatedAt,
+			Body: chirp.Body,
+			User_ID: chirp.UserID,
+		}
+		timeline[i] = data
+	}
+
+	respondWithJSON(w, http.StatusOK, timeline)
+}
