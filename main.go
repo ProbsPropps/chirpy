@@ -27,7 +27,7 @@ func main() {
 	apiCfg := apiConfig {
 		fileserverHits: atomic.Int32{},
 		queries: 		dbQueries,
-		platform: platform,
+		platform: 		platform,
 	}
 
 	mu := http.NewServeMux()
@@ -39,8 +39,9 @@ func main() {
 	mu.Handle("/app/", apiCfg.middlewareMetricsInc(http.StripPrefix("/app/", http.FileServer(http.Dir(".")))))
 	mu.HandleFunc("GET /admin/metrics", apiCfg.handlerMetrics)
 	mu.HandleFunc("POST /admin/reset", apiCfg.handlerReset)
-	mu.HandleFunc("POST /api/validate_chirp", handlerValidate)
+	mu.HandleFunc("POST /api/chips", apiCfg.handlerChirps)
 	mu.HandleFunc("POST /api/users", apiCfg.handlerCreateUser)
+	mu.HandleFunc("POST /api/chirps", apiCfg.handlerChirps)
 	server := http.Server{
 		Handler: 	mu,
 		Addr: 		":8080",
