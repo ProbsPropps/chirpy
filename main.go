@@ -15,6 +15,7 @@ import (
 func main() {
 	godotenv.Load()
 	dbURL := os.Getenv("DB_URL")
+	platform := os.Getenv("PLATFORM")
 	
 	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
@@ -25,7 +26,8 @@ func main() {
 
 	apiCfg := apiConfig {
 		fileserverHits: atomic.Int32{},
-		queries: dbQueries,
+		queries: 		dbQueries,
+		platform: platform,
 	}
 
 	mu := http.NewServeMux()
@@ -38,14 +40,16 @@ func main() {
 	mu.HandleFunc("GET /admin/metrics", apiCfg.handlerMetrics)
 	mu.HandleFunc("POST /admin/reset", apiCfg.handlerReset)
 	mu.HandleFunc("POST /api/validate_chirp", handlerValidate)
+	mu.HandleFunc("POST /api/users", apiCfg.handlerCreateUser)
 	server := http.Server{
-		Handler: mu,
-		Addr: ":8080",
+		Handler: 	mu,
+		Addr: 		":8080",
 	}
 	server.ListenAndServe()
 }
 
 type apiConfig struct {
-	fileserverHits atomic.Int32
-	queries *database.Queries
+	fileserverHits 	atomic.Int32
+	queries 		*database.Queries
+	platform 		string
 }
