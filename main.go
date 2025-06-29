@@ -42,6 +42,8 @@ func main() {
 	mu.HandleFunc("POST /api/users", apiCfg.handlerCreateUser)
 	mu.HandleFunc("POST /api/chirps", apiCfg.handlerChirps)
 	mu.HandleFunc("GET /api/chirps", apiCfg.handlerGetChirps)
+	mu.HandleFunc("GET /api/chirps/{chirpID}", apiCfg.handlerGetChirp)
+	mu.HandleFunc("POST /api/login", apiCfg.handlerLogin)
 	server := http.Server{
 		Handler: 	mu,
 		Addr: 		":8080",

@@ -10,3 +10,15 @@ RETURNING *;
 
 -- name: DeleteUsers :exec
 TRUNCATE users CASCADE;
+
+-- name: AddHashPass :exec
+UPDATE users
+SET hashed_password = $1
+WHERE email = $2;
+--
+
+-- name: GetUserByEmail :one
+SELECT *
+FROM users
+WHERE email = $1;
+--

@@ -7,7 +7,24 @@ package database
 
 import (
 	"context"
+	"database/sql"
 )
+
+const addHashPass = `-- name: AddHashPass :exec
+UPDATE users
+SET hashed_password = $1
+WHERE email = $2
+`
+
+type AddHashPassParams struct {
+	HashedPassword sql.NullString
+	Email          string
+}
+
+func (q *Queries) AddHashPass(ctx context.Context, arg AddHashPassParams) error {
+	_, err := q.db.ExecContext(ctx, addHashPass, arg.HashedPassword, arg.Email)
+	return err
+}
 
 const createUser = `-- name: CreateUser :one
 INSERT INTO users(id, created_at, updated_at, email)
@@ -17,7 +34,7 @@ VALUES (
     NOW(),
     $1
 )
-RETURNING id, created_at, updated_at, email
+RETURNING id, created_at, updated_at, email, hashed_password
 `
 
 func (q *Queries) CreateUser(ctx context.Context, email string) (User, error) {
@@ -28,6 +45,7 @@ func (q *Queries) CreateUser(ctx context.Context, email string) (User, error) {
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Email,
+		&i.HashedPassword,
 	)
 	return i, err
 }
@@ -39,4 +57,24 @@ TRUNCATE users CASCADE
 func (q *Queries) DeleteUsers(ctx context.Context) error {
 	_, err := q.db.ExecContext(ctx, deleteUsers)
 	return err
+}
+
+const getUserByEmail = `-- name: GetUserByEmail :one
+
+SELECT id, created_at, updated_at, email, hashed_password
+FROM users
+WHERE email = $1
+`
+
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserByEmail, email)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Email,
+		&i.HashedPassword,
+	)
+	return i, err
 }

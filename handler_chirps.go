@@ -81,3 +81,27 @@ func (cfg *apiConfig) handlerGetChirps(w http.ResponseWriter, req *http.Request)
 
 	respondWithJSON(w, http.StatusOK, timeline)
 }
+
+func (cfg *apiConfig) handlerGetChirp(w http.ResponseWriter, req *http.Request) {
+	pathVal := req.PathValue("chirpID")
+	userID, err := uuid.Parse(pathVal)
+	if err != nil {
+		respondWithError(w, http.StatusNotFound, "Couldn't create UUID from path value", err)
+		return
+	}
+	chirp, err := cfg.queries.GetChirp(req.Context(), userID)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Couldn't get chirp", err)
+		return
+	}
+
+	data := Chirp{
+		ID: chirp.ID,
+		CreatedAt: chirp.CreatedAt,
+		UpdatedAt: chirp.UpdatedAt,
+		Body: chirp.Body,
+		User_ID: chirp.UserID,
+	}
+
+	respondWithJSON(w, http.StatusOK, data)
+}
